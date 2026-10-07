@@ -59,29 +59,4 @@ The first start builds the index from the SPARQL endpoint and saves it in the fi
 ## Using the reconciliation from another project
 
 Pack KGCompass, then install the tarball in the other project:
-
-```sh
-# in kgcompass
-npm pack
-
-# in the other project
-npm install ../kgcompass/kgcompass-0.1.0.tgz
-```
-
-```ts
-import { getReconcileService, warmUpLunrIndexes } from "kgcompass";
-
-// once the host server is listening
-warmUpLunrIndexes();
-
-const service = getReconcileService("my-project");
-const candidates = await service.reconcileQueries(
-  { q0: { query: "X" } }, // replace X by the entity searching for
-  false,
-);
-```
-
-Two things to know:
-
-- KGCompass reads the YAML file given by `--config=` to the host process. It takes the `sparqlEndpoint`, `shacl`, `shaclTypes` and `reconciliation` keys of the project. Without `--config=`, it reads `config.yaml` in the working directory.
-- Get the services from `getReconcileService()`. Do not register the service classes in the tsyringe container of the host: it fails with `TypeInfo not known` as soon as the host has its own copy of tsyringe, which is the case when KGCompass is installed as a linked folder.
+...
