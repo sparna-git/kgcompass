@@ -1,0 +1,116 @@
+projects:
+  isidore:
+    shacl: ./config/isidore/isidore-shapes.ttl
+    sparqlEndpoint: https://isidore-ref.huma-num.fr/sparql
+    shaclTypes:
+      - http://isidore.science/class/Source
+      - http://www.w3.org/2004/02/skos/core#Concept
+      - http://isidore.science/class/Organization
+      - http://isidore.science/class/Document
+      - http://data.bnf.fr/ontology/bnf-onto/ExpositionVirtuelle
+      - http://xmlns.com/foaf/0.1/Agent
+      - http://isidore.science/class/Collection
+    reconciliation:
+      - implementation: IsidoreApiReconcileService
+      - implementation: SparqlReconcileService
+        cacheSize: 500
+        maxResults: 4
+  ruim-mcp:
+    shacl: ./config/ruim/RUIM-SHACL-instances-cleaned.ttl ./config/ruim/indications-shacl.ttl
+    sparqlEndpoint: https://data.sparna.fr/graphdb/repositories/RUIM
+    fewShotsFile: ./config/ruim/few-shots.json
+    useCases:
+      - title: "Correspondances CIP/UCD par ATC"
+        entryPoint: "`SpecialitePharmaceutique` filtré sur `med:codeATC`"
+        joins: "-> `Presentation` -> `UCD`"
+      - title: "Spécialités par substance active"
+        entryPoint: "`Substance` réconciliée -> `med:estSubstanceActiveDans`"
+        joins: "-> `SpecialitePharmaceutique`"
+      - title: "Génériques d'une spécialité"
+        entryPoint: "`GroupeGenerique` avec `med:specialiteDeReference`"
+        joins: "-> `med:specialiteGenerique`"
+      - title: "Présentations actives d'un laboratoire"
+        entryPoint: "`Organisation` réconciliée -> `med:titulaireCourant`"
+        joins: "-> `SpecialitePharmaceutique` -> `Presentation`"
+      - title: "Toutes les spécialités d'une forme"
+        entryPoint: "`Forme` filtrée sur libellé -> `med:formeManufacturee`"
+        joins: "<- `SpecialitePharmaceutique`"
+      - title: "Toutes les spécialités en fonction de leurs indications"
+        entryPoint: "`TherapeuticIndication` avec `Concept` réconcilié de l'indication + `Concept` réconcilié de l'effet -> `iso-idmp:hasTherapeuticIndication`"
+        join: "<- `SpecialitePharmaceutique`"
+      - title: "Toutes les Spécialités ayant une certaine action"
+        entryPoint: "`ActionPharmacologique` avec `Concept` réconcilié de la cible + `Concept` réconcilié de l'effet -> `hetopvoc:actionPharmacologique`"
+        join: "<- `SpecialitePharmaceutique`"
+      - title: "Composition d'une spécialité"
+        entryPoint: "`SpecialitePharmaceutique` filtrée sur libellé -> `med:seComposeDe`"
+        joins: "<- `Element` -> `med:substanceActive`|`med:fractionTherapeutique` (composition formelle) + <- `Element` -> `med:expressionDeDosage` (composition textuelle)"
+    shaclTypes:
+      - http://data.esante.gouv.fr/ansm/medicament/SpecialitePharmaceutique
+      - http://data.esante.gouv.fr/ansm/medicament/Presentation
+      - http://data.esante.gouv.fr/ansm/medicament/UniteCommuneDeDispensation
+      - http://data.esante.gouv.fr/ansm/medicament/GroupeGenerique
+      - http://data.esante.gouv.fr/ansm/medicament/Element
+      - http://data.esante.gouv.fr/ansm/medicament/ElementPresentation
+      - http://data.esante.gouv.fr/ansm/medicament/Unite
+      - http://data.esante.gouv.fr/ansm/medicament/ExpressionDeDosage
+      - http://data.esante.gouv.fr/ansm/medicament/Organisation
+      - http://data.esante.gouv.fr/ansm/medicament/Substance
+      - http://data.esante.gouv.fr/ansm/medicament/Voie
+      - http://data.esante.gouv.fr/ansm/medicament/Forme
+      - http://data.esante.gouv.fr/ansm/medicament/UniteDePresentation
+      - http://data.esante.gouv.fr/ansm/medicament/JustificationNiveauPrescriptibilite
+      - http://data.esante.gouv.fr/ansm/medicament/NiveauPrescriptibilite
+      - http://data.esante.gouv.fr/ansm/medicament/Gamme
+      - http://data.esante.gouv.fr/ansm/medicament/Evenement
+      - http://data.esante.gouv.fr/ansm/medicament/Autorisation
+      - http://data.esante.gouv.fr/ansm/medicament/ChangementDeStatut
+      - http://data.esante.gouv.fr/ansm/medicament/TypeProcedure
+      - http://data.esante.gouv.fr/ansm/medicament/StatutSpecialite
+      - http://data.esante.gouv.fr/ansm/medicament/TypeEvenement
+      - http://data.esante.gouv.fr/ema/sms
+      - https://spec.pistoiaalliance.org/idmp/ontology/ISO/ISO11615-MedicinalProducts/TherapeuticIndication
+      - https://hetop.eu/data/vocabulaire#ActionPharmacologique
+      - http://www.w3.org/2004/02/skos/core#Concept
+    reconciliation:
+      implementation: LunrReconcileService
+      cacheSize: 1000
+      maxResults: 6
+      indexCachePath: ./cache/ruim/lunr-index-ruim.json
+      sparqlQueries:
+        - field: label
+          boost: 10
+          queryFiles:
+            - ./config/ruim/sparqlqueriesindex/label_rdfs.rq
+            - ./config/ruim/sparqlqueriesindex/label_atc.rq
+        - field: altLabel
+          boost: 5
+          queryFile: ./config/ruim/sparqlqueriesindex/altlabel_skos.rq
+        - field: skosPrefLabel
+          boost: 10
+          queryFile: ./config/ruim/sparqlqueriesindex/skos_preflabel.rq
+  ep:
+    shacl: ./config/ep/eli-ep_meetings.shacl.ttl ./config/ep/eli-ep_parliamentary-questions.shacl.ttl ./config/ep/org-ep_meps.shacl.ttl ./config/ep/extra-definitions.ttl
+    sparqlEndpoint: https://data.sparna.fr/graphdb/repositories/EP
+    useCases:
+      - title: "Meetings attended by an MEP"
+        entryPoint: "`Person` linked to `Activity Plenary Sitting` by `eli-dl:has_participant_person`"
+      - title: "Authors of ^parliamentary question"
+        entryPoint: "`eli:Work` epvoc:workHadParticipation eli-dl:Participation with an eli-dl:has_participant_role of 'author', then eli-dl:has_participant_person to the Person"
+    shaclTypes:
+      - https://data.europarl.europa.eu/def/meps#Person
+      - https://data.europarl.europa.eu/def/meetings_api#Activity-MTG-PL
+    reconciliation:
+      implementation: LunrReconcileService
+      cacheSize: 1000
+      maxResults: 6
+      indexCachePath: ./cache/ep/lunr-index.json
+      sparqlQueries:
+        - field: label
+          boost: 10
+          queryFiles:
+            - ./config/ep/sparqlqueriesindex/rdfs_label.rq
+            - ./config/ep/sparqlqueriesindex/skos_prefLabel.rq
+            #- ./config/ep/sparqlqueriesindex/activity_label.rq
+        - field: altLabel
+          boost: 5
+          queryFile: ./config/ep/sparqlqueriesindex/skos_altLabel.rq

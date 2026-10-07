@@ -1,0 +1,10 @@
+node_modules/
+.env
+package-lock.json
+cache/
+dist/
+*.tgz
+
+src/mcp/tools/test.txt
+src/mcp/utils/generate-overview.ts
+src/mcp/utils/test.md
