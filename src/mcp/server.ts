@@ -74,7 +74,10 @@ export function createMcpRouter(
         }
 
         // build a new server instance for this session
-        const sessionServer = await buildServer(projectId, projectConfigAdapter);
+        const sessionServer = await buildServer(
+          projectId,
+          projectConfigAdapter,
+        );
         const transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: () => randomUUID(),
           enableJsonResponse: true,

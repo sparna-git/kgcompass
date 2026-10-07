@@ -8,7 +8,7 @@ import dotenv from "dotenv";
 import { createMcpRouter } from "./mcp/server";
 
 import { ConfigProvider } from "./config/ConfigProvider";
-import { warmUpLunrIndexes } from "./services/reconciliation/warmUpLunrIndexes";
+import { warmUpLunrIndexes } from "./reconciliation/warmUpLunrIndexes";
 
 dotenv.config();
 

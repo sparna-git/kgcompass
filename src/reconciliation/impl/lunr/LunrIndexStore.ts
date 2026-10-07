@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import lunr from "lunr";
 import { UriData } from "./types";
-import logger from "../../../../utils/logger";
+import logger from "../../../utils/logger";
 
 export class LunrIndexStore {
   constructor(private readonly filePath: string) {}
@@ -85,9 +85,7 @@ export class LunrIndexStore {
       const stream = fs.createWriteStream(this.filePath, { encoding: "utf-8" });
       const write = (chunk: string): Promise<void> =>
         new Promise((resolve, reject) => {
-          stream.write(chunk, (err) =>
-            err ? reject(err) : resolve(),
-          );
+          stream.write(chunk, (err) => (err ? reject(err) : resolve()));
         });
 
       await write(`{"index":${JSON.stringify(index.toJSON())},"uriToData":{`);

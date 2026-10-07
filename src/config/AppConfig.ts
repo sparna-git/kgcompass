@@ -7,13 +7,13 @@ import {
   SparqlReconcileServiceConfig,
 } from "./ProjectConfig";
 import { ConfigProvider } from "./ConfigProvider";
-import { SparqlReconcileService } from "../services/reconciliation/impl/SparqlReconcileService";
-import { SparqlReconcileServiceV13 } from "../services/reconciliation/impl/SparqlReconcileServiceV13";
-import { LuceneGraphDBReconcileService } from "../services/reconciliation/impl/LuceneGraphDBReconcileService";
-import { LunrReconcileService } from "../services/reconciliation/impl/lunr/LunrReconcileService";
-import { IsidoreApiReconcileService } from "../services/reconciliation/impl/IsidoreApiReconcileService";
-import { ChainedReconcileService } from "../services/reconciliation/ChainedReconcileService";
-import { ReconcileServiceIfc } from "../services/reconciliation/interfaces/ReconcileServiceIfc";
+import { SparqlReconcileService } from "../reconciliation/impl/SparqlReconcileService";
+import { SparqlReconcileServiceV13 } from "../reconciliation/impl/SparqlReconcileServiceV13";
+import { LuceneGraphDBReconcileService } from "../reconciliation/impl/LuceneGraphDBReconcileService";
+import { LunrReconcileService } from "../reconciliation/impl/lunr/LunrReconcileService";
+import { IsidoreApiReconcileService } from "../reconciliation/impl/IsidoreApiReconcileService";
+import { ChainedReconcileService } from "../reconciliation/ChainedReconcileService";
+import { ReconcileServiceIfc } from "../reconciliation/interfaces/ReconcileServiceIfc";
 
 const DEFAULT_RECONCILIATION_CONFIG: SparqlReconcileServiceConfig = {
   cacheSize: 1000,

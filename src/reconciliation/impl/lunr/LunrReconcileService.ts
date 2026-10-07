@@ -13,13 +13,13 @@ import {
   FieldQueryConfig,
   LunrReconcileServiceConfig,
   ProjectConfig,
-} from "../../../../config/ProjectConfig";
+} from "../../../config/ProjectConfig";
 import {
   collectUnresolvedLabels,
   buildLabelToUriMap,
   injectResolvedUris,
 } from "../../helpers/UriReconciliationHelperV13";
-import logger from "../../../../utils/logger";
+import logger from "../../../utils/logger";
 import { UriData } from "./types";
 import { ReconcileCache } from "./ReconcileCache";
 import { LunrIndexBuilder } from "./LunrIndexBuilder";

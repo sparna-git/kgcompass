@@ -14,17 +14,17 @@ const SHACL_CACHE: Record<
   { model: ShaclModel; postProcessor: ShaclSparqlPostProcessor }
 > = {};
 
-const SHACL_TTL_CACHE: Record<
-  string,
-  { ttl: string; firstPath: string }
-> = {};
+const SHACL_TTL_CACHE: Record<string, { ttl: string; firstPath: string }> = {};
 
 /**
  * Load and concatenate the raw Turtle SHACL files configured for a project.
  * Handles both single-file and space-separated multi-file configs.
  * Result is cached per project key.
  */
-export function loadShaclTtl(projectKey: string): { ttl: string; firstPath: string } {
+export function loadShaclTtl(projectKey: string): {
+  ttl: string;
+  firstPath: string;
+} {
   if (SHACL_TTL_CACHE[projectKey]) {
     return SHACL_TTL_CACHE[projectKey];
   }

@@ -1,7 +1,7 @@
 import lunr from "lunr";
 import { ReconcileResult } from "../../interfaces/ReconcileServiceIfc";
 import { UriData, SearchMode } from "./types";
-import logger from "../../../../utils/logger";
+import logger from "../../../utils/logger";
 
 export class LunrSearchEngine {
   // Top result must be this much better (relatively) than the 2nd to be a definitive match

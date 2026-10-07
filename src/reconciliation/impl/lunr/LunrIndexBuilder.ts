@@ -2,11 +2,11 @@ import axios from "axios";
 import https from "https";
 import fs from "fs";
 import lunr from "lunr";
-import { FieldQueryConfig } from "../../../../config/ProjectConfig";
-import { getSHACLConfig, listNodeShapeIris } from "../../../../config/SCHACL";
+import { FieldQueryConfig } from "../../../config/ProjectConfig";
+import { getSHACLConfig, listNodeShapeIris } from "../../../config/SCHACL";
 import { SparqlBinding, FieldBinding, LegacyBinding, UriData } from "./types";
 import { normalizeAccents } from "./lunrPipeline";
-import logger from "../../../../utils/logger";
+import logger from "../../../utils/logger";
 
 export class LunrIndexBuilder {
   constructor(

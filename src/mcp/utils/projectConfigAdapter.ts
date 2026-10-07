@@ -18,7 +18,7 @@ import {
 import type {
   ReconcileInput,
   ReconcileOutput,
-} from "../../services/reconciliation/interfaces/ReconcileServiceIfc";
+} from "../../reconciliation/interfaces/ReconcileServiceIfc";
 import type { UseCase, FewShot } from "../../config/ProjectConfig";
 import { loadFewShots } from "../../config/FewShots";
 

@@ -192,7 +192,9 @@ function renderValue(
 ): string | undefined {
   if (term.termType === "NamedNode") return compact(term.value, prefixes);
   if (term.termType === "Literal") {
-    return JSON.stringify(term.value) + (term.language ? `@${term.language}` : "");
+    return (
+      JSON.stringify(term.value) + (term.language ? `@${term.language}` : "")
+    );
   }
   return term.value;
 }

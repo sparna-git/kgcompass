@@ -1,5 +1,5 @@
 import { ReconcileResult } from "../../interfaces/ReconcileServiceIfc";
-import logger from "../../../../utils/logger";
+import logger from "../../../utils/logger";
 
 export class ReconcileCache {
   private cache: Map<string, ReconcileResult[]> = new Map();

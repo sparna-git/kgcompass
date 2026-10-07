@@ -2,7 +2,7 @@ import { inject, injectable } from "tsyringe";
 import {
   NoOpReconcileService,
   ReconcileServiceIfc,
-} from "../services/reconciliation/interfaces/ReconcileServiceIfc";
+} from "../reconciliation/interfaces/ReconcileServiceIfc";
 
 @injectable({ token: "Project" })
 export class Project {

@@ -1,4 +1,4 @@
-import { AppConfig } from "../../config/AppConfig";
+import { AppConfig } from "../config/AppConfig";
 import { ChainedReconcileService } from "./ChainedReconcileService";
 import { LunrReconcileService } from "./impl/lunr/LunrReconcileService";
 

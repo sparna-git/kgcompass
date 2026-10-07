@@ -8,7 +8,7 @@
  */
 import "reflect-metadata";
 import { AppConfig } from "./config/AppConfig";
-import type { ReconcileServiceIfc } from "./services/reconciliation/interfaces/ReconcileServiceIfc";
+import type { ReconcileServiceIfc } from "./reconciliation/interfaces/ReconcileServiceIfc";
 
 /**
  * The reconciliation service of a project (single or chained), as configured
@@ -22,15 +22,15 @@ export function getReconcileService(projectKey: string): ReconcileServiceIfc {
   return AppConfig.getInstance().getProject(projectKey).reconcileService;
 }
 
-export { warmUpLunrIndexes } from "./services/reconciliation/warmUpLunrIndexes";
+export { warmUpLunrIndexes } from "./reconciliation/warmUpLunrIndexes";
 
-export * from "./services/reconciliation/interfaces/ReconcileServiceIfc";
-export { ChainedReconcileService } from "./services/reconciliation/ChainedReconcileService";
-export { SparqlReconcileService } from "./services/reconciliation/impl/SparqlReconcileService";
-export { SparqlReconcileServiceV13 } from "./services/reconciliation/impl/SparqlReconcileServiceV13";
-export { LuceneGraphDBReconcileService } from "./services/reconciliation/impl/LuceneGraphDBReconcileService";
-export { LunrReconcileService } from "./services/reconciliation/impl/lunr/LunrReconcileService";
-export { IsidoreApiReconcileService } from "./services/reconciliation/impl/IsidoreApiReconcileService";
+export * from "./reconciliation/interfaces/ReconcileServiceIfc";
+export { ChainedReconcileService } from "./reconciliation/ChainedReconcileService";
+export { SparqlReconcileService } from "./reconciliation/impl/SparqlReconcileService";
+export { SparqlReconcileServiceV13 } from "./reconciliation/impl/SparqlReconcileServiceV13";
+export { LuceneGraphDBReconcileService } from "./reconciliation/impl/LuceneGraphDBReconcileService";
+export { LunrReconcileService } from "./reconciliation/impl/lunr/LunrReconcileService";
+export { IsidoreApiReconcileService } from "./reconciliation/impl/IsidoreApiReconcileService";
 
 export type {
   ReconciliationServiceConfig,

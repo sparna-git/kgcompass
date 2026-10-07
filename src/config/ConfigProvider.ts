@@ -11,15 +11,14 @@ export class ConfigProvider {
    * Singleton private constructor
    */
   private constructor() {
-
     // Lire le chemin du fichier de config depuis les arguments CLI
     const configPathFromArg = process.argv.find((arg) =>
-    arg.startsWith("--config=")
+      arg.startsWith("--config="),
     );
     const defaultConfigPath = path.resolve("config.yaml"); // chemin par défaut, relatif au dossier courant
     const resolvedConfigPath = configPathFromArg
-    ? configPathFromArg.split("=")[1]
-    : defaultConfigPath;
+      ? configPathFromArg.split("=")[1]
+      : defaultConfigPath;
 
     this.configPath = resolvedConfigPath;
     this.config = this.loadConfig();
