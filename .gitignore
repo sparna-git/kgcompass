@@ -8,3 +8,4 @@ dist/
 src/mcp/tools/test.txt
 src/mcp/utils/generate-overview.ts
 src/mcp/utils/test.md
+deploy.sh

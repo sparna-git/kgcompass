@@ -58,5 +58,36 @@ The first start builds the index from the SPARQL endpoint and saves it in the fi
 
 ## Using the reconciliation from another project
 
-Pack KGCompass, then install the tarball in the other project:
-...
+Add KGCompass to the dependencies of the other project, in one of two ways.
+
+From the npm registry:
+
+```sh
+npm install kgcompass
+```
+
+Or from a local copy of KGCompass, to use a version that is not published:
+
+```sh
+npm pack                                      # in kgcompass, writes kgcompass-0.1.0.tgz
+npm install ../kgcompass/kgcompass-0.1.0.tgz  # in the other project
+```
+
+`npm pack` builds the project first. Run both commands again after a change in KGCompass.
+
+The package exports the reconciliation only, not the MCP server:
+
+```ts
+import { getReconcileService, warmUpLunrIndexes } from "kgcompass";
+
+const service = getReconcileService("my-project");
+const output = await service.reconcileQueries(
+  { q0: { query: "Victor Hugo" } },
+  false, // includeTypes
+);
+
+// once at startup, for the projects that use LunrReconcileService
+warmUpLunrIndexes();
+```
+
+KGCompass has no config file of its own in that case. It reads the one of the host project, given by its `--config=` argument, and takes from each project the `sparqlEndpoint`, `shacl`, `shaclTypes` and `reconciliation` keys.
