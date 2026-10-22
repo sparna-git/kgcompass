@@ -1,8 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import {
-  NoOpReconcileService,
-  ReconcileServiceIfc,
-} from "../reconciliation/interfaces/ReconcileServiceIfc";
+import { NoOpReconcileService, ReconcileServiceIfc } from "kgreconcile";
 
 @injectable({ token: "Project" })
 export class Project {

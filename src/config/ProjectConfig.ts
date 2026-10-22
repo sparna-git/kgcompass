@@ -1,25 +1,11 @@
+import type { ReconcileProjectConfig } from "kgreconcile";
+
 export interface AppConfig {
   log?: {
     level?: string;
   };
   projects: Record<string, ProjectConfig>;
 }
-
-export type ReconciliationServiceConfig =
-  | ({
-      implementation: "SparqlReconcileService";
-    } & SparqlReconcileServiceConfig)
-  | ({
-      implementation: "SparqlReconcileServiceV13";
-    } & SparqlReconcileServiceV13Config)
-  | ({
-      implementation: "LuceneGraphDBReconcileService";
-    } & LuceneGraphDBReconcileServiceConfig)
-  | ({ implementation: "LunrReconcileService" } & LunrReconcileServiceConfig)
-  | ({
-      implementation: "IsidoreApiReconcileService";
-    } & IsidoreApiReconcileServiceConfig)
-  | { implementation: "DummyReconcileService" };
 
 export interface UseCase {
   /** Short, human-readable name of the use case (table row label). */
@@ -39,9 +25,8 @@ export interface FewShot {
   sparql: string;
 }
 
-export interface ProjectConfig {
-  sparqlEndpoint: string;
-  shaclTypes?: string[];
+/** sparqlEndpoint, shacl, shaclTypes and reconciliation come from kgreconcile. */
+export interface ProjectConfig extends ReconcileProjectConfig {
   /** Use cases rendered as a table in the MCP schema_overview. Each row tells
    *  the LLM where to enter the graph and which joins to follow for a recurring
    *  question pattern. NOT few-shots — no SPARQL, no literal example values. */
@@ -51,42 +36,4 @@ export interface ProjectConfig {
    *  agent can consult realistic examples before writing SPARQL.
    *  Kept out-of-band (separate file) to avoid bloating the main config. */
   fewShotsFile?: string;
-  reconciliation?: ReconciliationServiceConfig | ReconciliationServiceConfig[];
 }
-
-export interface SparqlReconcileServiceConfig {
-  cacheSize?: number;
-  maxResults?: number;
-}
-
-export interface SparqlReconcileServiceV13Config {
-  cacheSize?: number;
-  maxResults?: number;
-}
-export interface LuceneGraphDBReconcileServiceConfig {
-  cacheSize?: number;
-  maxResults?: number;
-  luceneIndexName?: string;
-}
-
-export interface FieldQueryConfig {
-  field: string;
-  boost?: number;
-  /** Inline SPARQL query string. Mutually exclusive with queryFile(s). */
-  query?: string;
-  /** Path to a single .rq file. Mutually exclusive with query. */
-  queryFile?: string;
-  /** Paths to multiple .rq files — all executed and bindings merged into this field. */
-  queryFiles?: string[];
-}
-
-export interface LunrReconcileServiceConfig {
-  cacheSize?: number;
-  maxResults?: number;
-  /** @deprecated use sparqlQueries instead */
-  sparqlQuery?: string;
-  sparqlQueries?: FieldQueryConfig[];
-  indexCachePath?: string;
-}
-
-export interface IsidoreApiReconcileServiceConfig {}

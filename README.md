@@ -42,7 +42,7 @@ projects:
 | `fewShotsFile`   | Optional. A JSON file of `question` and `sparql` pairs, returned by `get_few_shots`.                                     |
 | `reconciliation` | Optional. One service, or a list of services tried in order until one returns candidates.                                |
 
-The reconciliation services, to put in `implementation`:
+The reconciliation services, to put in `implementation` (see [Reconciliation](#reconciliation)):
 
 - `SparqlReconcileService`: exact match on the labels, with SPARQL queries. Used when `reconciliation` is absent.
 - `SparqlReconcileServiceV13`: the same, for the v13 structure of the Sparnatural queries.
@@ -54,40 +54,22 @@ They accept `cacheSize` and `maxResults`, except the last one.
 
 ### Lunr index
 
-The first start builds the index from the SPARQL endpoint and saves it in the file given by `indexCachePath`. The next starts load that file instead of building the index again. Delete it to rebuild the index.
+The first start builds the index from the SPARQL endpoint and saves it in the file given by `indexCachePath`. The next starts load that file instead of building the index again. Delete it, or run `npx kgreconcile index --force`, to rebuild the index.
 
-## Using the reconciliation from another project
+## Reconciliation
 
-Add KGCompass to the dependencies of the other project, in one of two ways.
-
-From the npm registry:
+The reconciliation services come from the [kgreconcile](https://github.com/sparna-git/kgreconcile) package, which also gives a command line to reconcile labels or build the Lunr index of a project without starting the server:
 
 ```sh
-npm install kgcompass
+npx kgreconcile index --config=config/config.yaml --project=ep
+npx kgreconcile reconcile "Roberta Metsola" --config=config/config.yaml --project=ep
 ```
 
-Or from a local copy of KGCompass, to use a version that is not published:
+Until kgreconcile is published, KGCompass installs it from a local copy, next to this one:
 
 ```sh
-npm pack                                      # in kgcompass, writes kgcompass-0.1.0.tgz
-npm install ../kgcompass/kgcompass-0.1.0.tgz  # in the other project
+npm pack                                          # in kgreconcile, writes kgreconcile-0.1.0.tgz
+npm install ../kgreconcile/kgreconcile-0.1.0.tgz  # in kgcompass
 ```
 
-`npm pack` builds the project first. Run both commands again after a change in KGCompass.
-
-The package exports the reconciliation only, not the MCP server:
-
-```ts
-import { getReconcileService, warmUpLunrIndexes } from "kgcompass";
-
-const service = getReconcileService("my-project");
-const output = await service.reconcileQueries(
-  { q0: { query: "Victor Hugo" } },
-  false, // includeTypes
-);
-
-// once at startup, for the projects that use LunrReconcileService
-warmUpLunrIndexes();
-```
-
-KGCompass has no config file of its own in that case. It reads the one of the host project, given by its `--config=` argument, and takes from each project the `sparqlEndpoint`, `shacl`, `shaclTypes` and `reconciliation` keys.
+Run both commands again after a change in kgreconcile.

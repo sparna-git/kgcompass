@@ -8,7 +8,7 @@ import dotenv from "dotenv";
 import { createMcpRouter } from "./mcp/server";
 
 import { ConfigProvider } from "./config/ConfigProvider";
-import { warmUpLunrIndexes } from "./reconciliation/warmUpLunrIndexes";
+import { warmUpLunrIndexes } from "kgreconcile";
 
 dotenv.config();
 
@@ -52,5 +52,12 @@ app.listen(PORT, () => {
   }
 
   // Until the indexes are ready, a reconciliation call waits for its index.
-  warmUpLunrIndexes();
+  const appConfig = AppConfig.getInstance();
+  warmUpLunrIndexes(
+    Object.fromEntries(
+      appConfig
+        .listProjects()
+        .map((key) => [key, appConfig.getProject(key).reconcileService]),
+    ),
+  );
 });

@@ -15,10 +15,7 @@ import {
   type NodeShapeInfo,
   type NodeShapeOverviewInfo,
 } from "./shaclParser";
-import type {
-  ReconcileInput,
-  ReconcileOutput,
-} from "../../reconciliation/interfaces/ReconcileServiceIfc";
+import type { ReconcileInput, ReconcileOutput } from "kgreconcile";
 import type { UseCase, FewShot } from "../../config/ProjectConfig";
 import { loadFewShots } from "../../config/FewShots";
 

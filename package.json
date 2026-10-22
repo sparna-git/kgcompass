@@ -2,17 +2,11 @@
   "name": "kgcompass",
   "version": "0.1.0",
   "description": "MCP-over-SPARQL: lets an AI agent explore and query a knowledge graph described in SHACL",
-  "main": "dist/lib.js",
-  "types": "dist/lib.d.ts",
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "start": "ts-node src/index.ts --max-old-space-size=8192 --config=config/config.yaml",
     "clean": "rm -rf dist",
     "build:lib": "tsc",
-    "build": "npm run build:lib",
-    "prepack": "npm run build"
+    "build": "npm run build:lib"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
@@ -21,9 +15,7 @@
     "dotenv": "^16.5.0",
     "express": "^4.18.2",
     "js-yaml": "^4.1.0",
-    "lunr": "^2.3.9",
-    "pino": "^9.9.0",
-    "pino-pretty": "^13.1.1",
+    "kgreconcile": "file:../kgreconcile/kgreconcile-0.1.0.tgz",
     "rdf-data-factory": "^1.1.2",
     "rdf-shacl-commons": "0.3.5",
     "reflect-metadata": "^0.2.2",
@@ -36,7 +28,6 @@
     "@types/cors": "^2.8.18",
     "@types/express": "^4.17.17",
     "@types/js-yaml": "^4.0.9",
-    "@types/lunr": "^2.3.7",
     "@types/node": "^18.17.0",
     "@types/sparqljs": "^3.1.12",
     "ts-node": "^10.9.1",
