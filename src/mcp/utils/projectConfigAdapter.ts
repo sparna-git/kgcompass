@@ -15,7 +15,11 @@ import {
   type NodeShapeInfo,
   type NodeShapeOverviewInfo,
 } from "./shaclParser";
-import type { ReconcileInput, ReconcileOutput } from "kgreconcile";
+import type {
+  ReconcileInput,
+  ReconcileOutput,
+  ReconciliationServiceConfig,
+} from "kgreconcile";
 import type { UseCase, FewShot } from "../../config/ProjectConfig";
 import { loadFewShots } from "../../config/FewShots";
 
@@ -29,6 +33,14 @@ export interface ProjectConfig {
   shaclTypes?: string[];
   useCases?: UseCase[];
   fewShotsFile?: string;
+  conceptSchemes?: string[];
+}
+
+/** A concept of a controlled vocabulary, its labels written "label@lang". */
+export interface ConceptInfo {
+  iri: string;
+  prefLabels: string[];
+  altLabels: string[];
 }
 
 /**
@@ -69,6 +81,43 @@ export interface ProjectConfigAdapter {
   /** Returns the curated NL+SPARQL samples for the project, or `undefined`
    *  if no `fewShotsFile` is configured or the file is missing. */
   getFewShots(projectId: string): Promise<FewShot[] | undefined>;
+  /** Every concept of a vocabulary, with its labels. */
+  listConcepts(projectId: string, scheme: string): Promise<ConceptInfo[]>;
+}
+
+const SKOS = "http://www.w3.org/2004/02/skos/core#";
+
+type SparqlTerm = { value: string; "xml:lang"?: string };
+type SparqlRow = Record<string, SparqlTerm | undefined>;
+
+function rowsOf(result: Record<string, unknown>): SparqlRow[] {
+  return (
+    (result.results as { bindings?: SparqlRow[] } | undefined)?.bindings ?? []
+  );
+}
+
+/**
+ * The `shaclTypes` of the reconciliation services of a project, all of them
+ * together, or undefined when none of the services lists any.
+ */
+function shaclTypesOf(
+  reconciliation:
+    | ReconciliationServiceConfig
+    | ReconciliationServiceConfig[]
+    | undefined,
+): string[] | undefined {
+  const services = !reconciliation
+    ? []
+    : Array.isArray(reconciliation)
+      ? reconciliation
+      : [reconciliation];
+  const types = [...new Set(services.flatMap((s) => s.shaclTypes ?? []))];
+  return types.length > 0 ? types : undefined;
+}
+
+function withLang(term: SparqlTerm): string {
+  const lang = term["xml:lang"];
+  return lang ? `${term.value}@${lang}` : term.value;
 }
 
 /**
@@ -97,10 +146,11 @@ export class ConfigBackedProjectConfigAdapter implements ProjectConfigAdapter {
       sparqlEndpoint: projectConfig.sparqlEndpoint,
       shaclPath: projectConfig.shacl,
       shaclTypes:
-        projectConfig.shaclTypes ??
+        shaclTypesOf(projectConfig.reconciliation) ??
         (await this.resolveShaclTypesFromModel(projectId)),
       useCases: projectConfig.useCases,
       fewShotsFile: projectConfig.fewShotsFile,
+      conceptSchemes: projectConfig.conceptSchemes,
     };
   }
 
@@ -249,5 +299,60 @@ export class ConfigBackedProjectConfigAdapter implements ProjectConfigAdapter {
   ): Promise<ReconcileOutput> {
     const project = AppConfig.getInstance().getProject(projectId);
     return project.reconcileService.reconcileQueries(queries, includeTypes);
+  }
+
+  // The concepts of each vocabulary, by project and vocabulary: read once in
+  // the data, then kept in memory. Forgotten on failure, so that the next
+  // call tries again.
+  private readonly concepts = new Map<string, Promise<ConceptInfo[]>>();
+
+  listConcepts(projectId: string, scheme: string): Promise<ConceptInfo[]> {
+    const key = `${projectId}|${scheme}`;
+    let concepts = this.concepts.get(key);
+    if (!concepts) {
+      concepts = this.loadConcepts(projectId, scheme).catch((err) => {
+        this.concepts.delete(key);
+        throw err;
+      });
+      this.concepts.set(key, concepts);
+    }
+    return concepts;
+  }
+
+  private async loadConcepts(
+    projectId: string,
+    scheme: string,
+  ): Promise<ConceptInfo[]> {
+    const query = `PREFIX skos: <${SKOS}>
+SELECT ?concept ?kind ?label WHERE {
+  ?concept skos:inScheme|skos:topConceptOf <${scheme}> .
+  OPTIONAL {
+    { ?concept skos:prefLabel ?label BIND("pref" AS ?kind) }
+    UNION
+    { ?concept skos:altLabel ?label BIND("alt" AS ?kind) }
+  }
+}`;
+    const concepts = new Map<
+      string,
+      { prefLabels: Set<string>; altLabels: Set<string> }
+    >();
+    for (const row of rowsOf(await this.executeSparql(projectId, query))) {
+      if (!row.concept) continue;
+      const iri = row.concept.value;
+      if (!concepts.has(iri))
+        concepts.set(iri, { prefLabels: new Set(), altLabels: new Set() });
+      if (!row.label) continue;
+      const entry = concepts.get(iri)!;
+      (row.kind?.value === "alt" ? entry.altLabels : entry.prefLabels).add(
+        withLang(row.label),
+      );
+    }
+    return [...concepts]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([iri, { prefLabels, altLabels }]) => ({
+        iri,
+        prefLabels: [...prefLabels],
+        altLabels: [...altLabels],
+      }));
   }
 }

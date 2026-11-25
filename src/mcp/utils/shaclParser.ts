@@ -11,6 +11,7 @@ const KEY_SHAPE_PRED = _rdfFactory.namedNode(
 const SKOS_NOTATION = "http://www.w3.org/2004/02/skos/core#notation";
 const DCT_IDENTIFIER = "http://purl.org/dc/terms/identifier";
 const SKOS_EXACT_MATCH = "http://www.w3.org/2004/02/skos/core#exactMatch";
+const SKOS_IN_SCHEME = "http://www.w3.org/2004/02/skos/core#inScheme";
 
 // Names of properties that look like identifiers when paired with a required
 // xsd:string datatype. Kept intentionally loose so app-specific identifiers
@@ -65,6 +66,9 @@ export interface PropertyShapeInfo {
   classes?: string[];
   /** `sh:node`: the shape the values conform to. A shape IRI, not a class. */
   targetShape?: string[];
+  /** The vocabulary of the values, when the `sh:node` shape fixes their
+   *  `skos:inScheme` with `sh:hasValue`. Full IRI, as `list_concepts` expects. */
+  vocabulary?: string;
   datatypes?: string[];
   values?: string[];
   /** `sh:hasValue`: a value every instance must have on this path. */
@@ -197,6 +201,26 @@ function renderValue(
     );
   }
   return term.value;
+}
+
+/**
+ * The shapes that describe the concepts of one vocabulary: those with a
+ * `skos:inScheme` property that has a `sh:hasValue`. Shape IRI → vocabulary IRI.
+ */
+function readVocabularyShapes(model: ShaclModel): Map<string, string> {
+  const vocabularies = new Map<string, string>();
+  for (const ns of model.readAllNodeShapes()) {
+    for (const ps of ns.getProperties()) {
+      const scheme = ps.getShHasValue();
+      if (
+        ps.getShPath()?.value === SKOS_IN_SCHEME &&
+        scheme?.termType === "NamedNode"
+      ) {
+        vocabularies.set(ns.getResource().value, scheme.value);
+      }
+    }
+  }
+  return vocabularies;
 }
 
 /** The `sh:select` of a shape's SPARQL target, if it has one. */
@@ -404,6 +428,7 @@ export function extractNodeShapes(
 
   // Discover every language present in this SHACL file at runtime.
   const allLangs = model.readAllLanguages();
+  const vocabularyShapes = readVocabularyShapes(model);
 
   return model.readAllNodeShapes().map((ns) => {
     const shapeIri = c(ns.getResource().value)!;
@@ -422,7 +447,15 @@ export function extractNodeShapes(
       // des IRI de rdf:type à mettre dans ses requêtes. Une cible sh:node est
       // un nom de shape, pas un type, et produirait une requête sans résultat.
       const classes = ps.getShClass().map((r) => c(r.value)!);
-      const targetShapes = ps.getShNode().map((r) => c(r.value)!);
+      // A sh:node towards the shape of a vocabulary gives the vocabulary
+      // instead of that shape, which has nothing else to discover.
+      const nodeShapes = ps.getShNode().map((r) => r.value);
+      const vocabulary = nodeShapes
+        .map((s) => vocabularyShapes.get(s))
+        .find((v) => v !== undefined);
+      const targetShapes = nodeShapes
+        .filter((s) => !vocabularyShapes.has(s))
+        .map((s) => c(s)!);
       const datatypes = ps.getShDatatype().map((d) => c(d.getUri().value)!);
 
       const shIn = ps.getShIn();
@@ -443,6 +476,7 @@ export function extractNodeShapes(
       if (ps.getShMaxCount() != null) prop.maxCount = ps.getShMaxCount();
       if (classes.length) prop.classes = classes;
       if (targetShapes.length) prop.targetShape = targetShapes;
+      if (vocabulary) prop.vocabulary = vocabulary;
       if (datatypes.length) prop.datatypes = datatypes;
       if (values?.length) prop.values = values;
       if (shHasValue) prop.hasValue = renderValue(shHasValue, prefixes);

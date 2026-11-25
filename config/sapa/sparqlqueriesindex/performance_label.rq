@@ -1,0 +1,7 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX frbroo: <http://iflastandards.info/ns/fr/frbr/frbroo/>
+SELECT DISTINCT ?entity ?value WHERE {
+  VALUES ?class { frbroo:F20_Performance_Work frbroo:F25_Performance_Plan }
+  ?entity a ?class ;
+    rdfs:label ?value .
+}

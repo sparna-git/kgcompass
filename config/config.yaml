@@ -2,17 +2,17 @@ projects:
   isidore:
     shacl: ./config/isidore/isidore-shapes.ttl
     sparqlEndpoint: https://isidore-ref.huma-num.fr/sparql
-    shaclTypes:
-      - http://isidore.science/class/Source
-      - http://www.w3.org/2004/02/skos/core#Concept
-      - http://isidore.science/class/Organization
-      - http://isidore.science/class/Document
-      - http://data.bnf.fr/ontology/bnf-onto/ExpositionVirtuelle
-      - http://xmlns.com/foaf/0.1/Agent
-      - http://isidore.science/class/Collection
     reconciliation:
       - implementation: IsidoreApiReconcileService
       - implementation: SparqlReconcileService
+        shaclTypes:
+          - http://isidore.science/class/Source
+          - http://www.w3.org/2004/02/skos/core#Concept
+          - http://isidore.science/class/Organization
+          - http://isidore.science/class/Document
+          - http://data.bnf.fr/ontology/bnf-onto/ExpositionVirtuelle
+          - http://xmlns.com/foaf/0.1/Agent
+          - http://isidore.science/class/Collection
         cacheSize: 500
         maxResults: 4
   ruim-mcp:
@@ -44,35 +44,35 @@ projects:
       - title: "Composition d'une spécialité"
         entryPoint: "`SpecialitePharmaceutique` filtrée sur libellé -> `med:seComposeDe`"
         joins: "<- `Element` -> `med:substanceActive`|`med:fractionTherapeutique` (composition formelle) + <- `Element` -> `med:expressionDeDosage` (composition textuelle)"
-    shaclTypes:
-      - http://data.esante.gouv.fr/ansm/medicament/SpecialitePharmaceutique
-      - http://data.esante.gouv.fr/ansm/medicament/Presentation
-      - http://data.esante.gouv.fr/ansm/medicament/UniteCommuneDeDispensation
-      - http://data.esante.gouv.fr/ansm/medicament/GroupeGenerique
-      - http://data.esante.gouv.fr/ansm/medicament/Element
-      - http://data.esante.gouv.fr/ansm/medicament/ElementPresentation
-      - http://data.esante.gouv.fr/ansm/medicament/Unite
-      - http://data.esante.gouv.fr/ansm/medicament/ExpressionDeDosage
-      - http://data.esante.gouv.fr/ansm/medicament/Organisation
-      - http://data.esante.gouv.fr/ansm/medicament/Substance
-      - http://data.esante.gouv.fr/ansm/medicament/Voie
-      - http://data.esante.gouv.fr/ansm/medicament/Forme
-      - http://data.esante.gouv.fr/ansm/medicament/UniteDePresentation
-      - http://data.esante.gouv.fr/ansm/medicament/JustificationNiveauPrescriptibilite
-      - http://data.esante.gouv.fr/ansm/medicament/NiveauPrescriptibilite
-      - http://data.esante.gouv.fr/ansm/medicament/Gamme
-      - http://data.esante.gouv.fr/ansm/medicament/Evenement
-      - http://data.esante.gouv.fr/ansm/medicament/Autorisation
-      - http://data.esante.gouv.fr/ansm/medicament/ChangementDeStatut
-      - http://data.esante.gouv.fr/ansm/medicament/TypeProcedure
-      - http://data.esante.gouv.fr/ansm/medicament/StatutSpecialite
-      - http://data.esante.gouv.fr/ansm/medicament/TypeEvenement
-      - http://data.esante.gouv.fr/ema/sms
-      - https://spec.pistoiaalliance.org/idmp/ontology/ISO/ISO11615-MedicinalProducts/TherapeuticIndication
-      - https://hetop.eu/data/vocabulaire#ActionPharmacologique
-      - http://www.w3.org/2004/02/skos/core#Concept
     reconciliation:
       implementation: LunrReconcileService
+      shaclTypes:
+        - http://data.esante.gouv.fr/ansm/medicament/SpecialitePharmaceutique
+        - http://data.esante.gouv.fr/ansm/medicament/Presentation
+        - http://data.esante.gouv.fr/ansm/medicament/UniteCommuneDeDispensation
+        - http://data.esante.gouv.fr/ansm/medicament/GroupeGenerique
+        - http://data.esante.gouv.fr/ansm/medicament/Element
+        - http://data.esante.gouv.fr/ansm/medicament/ElementPresentation
+        - http://data.esante.gouv.fr/ansm/medicament/Unite
+        - http://data.esante.gouv.fr/ansm/medicament/ExpressionDeDosage
+        - http://data.esante.gouv.fr/ansm/medicament/Organisation
+        - http://data.esante.gouv.fr/ansm/medicament/Substance
+        - http://data.esante.gouv.fr/ansm/medicament/Voie
+        - http://data.esante.gouv.fr/ansm/medicament/Forme
+        - http://data.esante.gouv.fr/ansm/medicament/UniteDePresentation
+        - http://data.esante.gouv.fr/ansm/medicament/JustificationNiveauPrescriptibilite
+        - http://data.esante.gouv.fr/ansm/medicament/NiveauPrescriptibilite
+        - http://data.esante.gouv.fr/ansm/medicament/Gamme
+        - http://data.esante.gouv.fr/ansm/medicament/Evenement
+        - http://data.esante.gouv.fr/ansm/medicament/Autorisation
+        - http://data.esante.gouv.fr/ansm/medicament/ChangementDeStatut
+        - http://data.esante.gouv.fr/ansm/medicament/TypeProcedure
+        - http://data.esante.gouv.fr/ansm/medicament/StatutSpecialite
+        - http://data.esante.gouv.fr/ansm/medicament/TypeEvenement
+        - http://data.esante.gouv.fr/ema/sms
+        - https://spec.pistoiaalliance.org/idmp/ontology/ISO/ISO11615-MedicinalProducts/TherapeuticIndication
+        - https://hetop.eu/data/vocabulaire#ActionPharmacologique
+        - http://www.w3.org/2004/02/skos/core#Concept
       cacheSize: 1000
       maxResults: 6
       indexCachePath: ./cache/ruim/lunr-index-ruim.json
@@ -96,11 +96,11 @@ projects:
         entryPoint: "`Person` linked to `Activity Plenary Sitting` by `eli-dl:has_participant_person`"
       - title: "Authors of ^parliamentary question"
         entryPoint: "`eli:Work` epvoc:workHadParticipation eli-dl:Participation with an eli-dl:has_participant_role of 'author', then eli-dl:has_participant_person to the Person"
-    shaclTypes:
-      - https://data.europarl.europa.eu/def/meps#Person
-      - https://data.europarl.europa.eu/def/meetings_api#Activity-MTG-PL
     reconciliation:
       implementation: LunrReconcileService
+      shaclTypes:
+        - https://data.europarl.europa.eu/def/meps#Person
+        - https://data.europarl.europa.eu/def/meetings_api#Activity-MTG-PL
       cacheSize: 1000
       maxResults: 6
       indexCachePath: ./cache/ep/lunr-index.json
@@ -110,7 +110,53 @@ projects:
           queryFiles:
             - ./config/ep/sparqlqueriesindex/rdfs_label.rq
             - ./config/ep/sparqlqueriesindex/skos_prefLabel.rq
-            #- ./config/ep/sparqlqueriesindex/activity_label.rq
+            # - ./config/ep/sparqlqueriesindex/activity_label.rq
         - field: altLabel
           boost: 5
           queryFile: ./config/ep/sparqlqueriesindex/skos_altLabel.rq
+  sapa:
+    shacl: ./config/sapa/sapa-authorities.ttl ./config/sapa/sapa-performances.ttl
+    sparqlEndpoint: https://qlever.performing-arts.ch/
+    # Vocabulaires lus par le tool sapa_list_concepts : ceux des 2 SHACL
+    conceptSchemes:
+      - http://vocab.performing-arts.ch/mu
+      - http://vocab.performing-arts.ch/mn
+      - http://vocab.performing-arts.ch/lg
+      - http://vocab.performing-arts.ch/vr
+      - http://vocab.performing-arts.ch/hl
+      - http://vocab.performing-arts.ch/rg
+      - http://vocab.performing-arts.ch/go
+      - http://vocab.performing-arts.ch/eo
+      - http://vocab.performing-arts.ch/ct
+      - http://vocab.performing-arts.ch/id
+      - http://vocab.performing-arts.ch/ih
+      - http://vocab.performing-arts.ch/ya
+      - http://vocab.performing-arts.ch/dw
+    reconciliation:
+      implementation: LunrReconcileService
+      shaclTypes:
+        # Performances
+        - http://shapes.performing-arts.ch/performances/F25_Performance_Plan
+        - http://shapes.performing-arts.ch/performances/Performance_Serie
+        - http://shapes.performing-arts.ch/performances/Performance_Standalone
+        - http://shapes.performing-arts.ch/performances/Single_Performance
+        # Autorités
+        - http://shapes.performing-arts.ch/authorities/E39_Actor_special
+        - http://shapes.performing-arts.ch/authorities/E28_Conceptual_Object
+        - http://shapes.performing-arts.ch/authorities/Group_Legal_Body_Family
+        - http://shapes.performing-arts.ch/authorities/E21_Person
+        - http://shapes.performing-arts.ch/authorities/Place_known
+        - http://shapes.performing-arts.ch/authorities/Venue
+      cacheSize: 1000
+      maxResults: 6
+      indexCachePath: ./cache/sapa/lunr-index.json
+      sparqlQueries:
+        - field: label
+          boost: 10
+          queryFiles:
+            - ./config/sapa/sparqlqueriesindex/performance_label.rq
+            - ./config/sapa/sparqlqueriesindex/authorities_label.rq
+        - field: altLabel
+          boost: 5
+          queryFiles:
+            - ./config/sapa/sparqlqueriesindex/authorities_altlabel.rq

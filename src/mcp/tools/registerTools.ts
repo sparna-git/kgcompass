@@ -3,6 +3,7 @@ import { z } from "zod/v3";
 import axios from "axios";
 import {
   SPARQL_TIMEOUT_MS,
+  type ConceptInfo,
   type ProjectConfigAdapter,
 } from "../utils/projectConfigAdapter";
 import { buildSchemaOverviewMarkdown } from "../utils/overviewMarkdown";
@@ -31,6 +32,20 @@ function sparqlResultToText(result: Record<string, unknown>): string {
   return [`${rows.length} rows`, vars.join("\t"), ...rows].join("\n");
 }
 
+// The concepts of a vocabulary as a count followed by a TSV table, like the
+// SPARQL results: one line per concept, its labels joined with " | ".
+function conceptsToText(scheme: string, concepts: ConceptInfo[]): string {
+  const cell = (labels: string[]) =>
+    labels.join(" | ").replace(/[\t\r\n]+/g, " ");
+  return [
+    `${concepts.length} concepts in ${scheme}`,
+    "concept\tprefLabel\taltLabel",
+    ...concepts.map(
+      (c) => `${c.iri}\t${cell(c.prefLabels)}\t${cell(c.altLabels)}`,
+    ),
+  ].join("\n");
+}
+
 // This file centralizes registration of all MCP tools for the project.
 interface RegisterToolsOptions {
   projectConfigAdapter: ProjectConfigAdapter;
@@ -44,7 +59,7 @@ export async function registerTools(
 ): Promise<void> {
   const { projectConfigAdapter, projectId } = options;
 
-  const [{ shaclTypes, useCases }, shapesGraphMeta] = await Promise.all([
+  const [{ shaclTypes, useCases, conceptSchemes }, shapesGraphMeta] = await Promise.all([
     projectConfigAdapter.getProjectConfig(projectId),
     projectConfigAdapter.getShapesGraphMeta(projectId).catch(() => ({
       title: undefined,
@@ -394,6 +409,14 @@ export async function registerTools(
                       .describe(
                         "When present, indicates the node shapes the values of this predicate conform to. These are shape IRIs, not classes: call discover_nodeshapes on them to get their predicates, do NOT use them as rdf:type constraints.",
                       ),
+                    vocabulary: z
+                      .string()
+                      .optional()
+                      .describe(
+                        conceptSchemes && conceptSchemes.length > 0
+                          ? `When present, the values of this predicate are concepts of this vocabulary (skos:ConceptScheme). Call ${projectId}_list_concepts with this IRI as 'scheme' to get the IRIs of its concepts.`
+                          : "When present, the values of this predicate are concepts of this vocabulary (skos:ConceptScheme).",
+                      ),
                     datatypes: z
                       .array(z.string())
                       .optional()
@@ -583,6 +606,57 @@ export async function registerTools(
       }
     },
   );
+
+  // ${projectId}_list_concepts: the concepts of a controlled vocabulary. Only
+  // for the projects that list `conceptSchemes` in their config.
+  if (conceptSchemes && conceptSchemes.length > 0) {
+    server.registerTool(
+      `${projectId}_list_concepts`,
+      {
+        title: `Concepts of a vocabulary of project ${projectId}`,
+        description:
+          `${projectId}_list_concepts : returns every concept of a controlled vocabulary of project '${projectId}', with its IRI and its labels, to find the IRI of a value such as an activity type, a genre or a language. ` +
+          `MANDATORY when the query needs a value of a vocabulary (a property with a 'vocabulary' in ${projectId}_discover_nodeshapes): call it after ${projectId}_reconcile_entities, before ${projectId}_query_sparql, and use the IRIs it returns. ` +
+          `Prefer it over a SPARQL search on the labels.`,
+        inputSchema: {
+          scheme: z
+            .enum(conceptSchemes as [string, ...string[]])
+            .describe("IRI of the vocabulary (skos:ConceptScheme) to list."),
+        },
+        annotations: {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: true,
+        },
+      },
+      async ({ scheme }) => {
+        try {
+          const concepts = await projectConfigAdapter.listConcepts(
+            projectId,
+            scheme,
+          );
+          return {
+            content: [
+              {
+                type: "text",
+                text: conceptsToText(scheme, concepts),
+              },
+            ],
+          };
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          return {
+            isError: true,
+            content: [
+              { type: "text", text: `list_concepts failed: ${message}` },
+            ],
+          };
+        }
+      },
+    );
+  }
 
   // ${projectId}_query_sparql tool used to execute the finalized SPARQL query after schema inspection and entity reconciliation.
   server.registerTool(

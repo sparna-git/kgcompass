@@ -25,7 +25,7 @@ export interface FewShot {
   sparql: string;
 }
 
-/** sparqlEndpoint, shacl, shaclTypes and reconciliation come from kgreconcile. */
+/** sparqlEndpoint, shacl and reconciliation (with its shaclTypes) come from kgreconcile. */
 export interface ProjectConfig extends ReconcileProjectConfig {
   /** Use cases rendered as a table in the MCP schema_overview. Each row tells
    *  the LLM where to enter the graph and which joins to follow for a recurring
@@ -36,4 +36,8 @@ export interface ProjectConfig extends ReconcileProjectConfig {
    *  agent can consult realistic examples before writing SPARQL.
    *  Kept out-of-band (separate file) to avoid bloating the main config. */
   fewShotsFile?: string;
+  /** IRIs of the controlled vocabularies (skos:ConceptScheme) of the project.
+   *  When set, the MCP `${projectId}_list_concepts` tool is exposed and returns
+   *  the concepts of one of them; without it, the tool does not exist. */
+  conceptSchemes?: string[];
 }

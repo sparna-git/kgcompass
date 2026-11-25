@@ -1,0 +1,12 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
+SELECT DISTINCT ?entity ?value WHERE {
+  VALUES ?class {
+    crm:E21_Person crm:E74_Group crm:E40_Legal_Body rico:Family crm:E39_Actor
+    crm:E28_Conceptual_Object crm:E53_Place crm:E22_Man-Made_Object
+  }
+  ?entity a ?class ;
+    rdfs:label ?value .
+  FILTER(!STRSTARTS(STR(?entity), "http://data.performing-arts.ch/u/"))
+}
